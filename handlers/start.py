@@ -3,6 +3,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import Dispatcher, types
 from aiogram.enums import ParseMode
 from aiogram import Bot
+
+from aiogramproject.handlers.bonus.clicker import keyboard
 from aiogramproject.logs import logger
 from aiogramproject.base.main.core import async_engine
 from aiogramproject.base.models import users_table
@@ -22,6 +24,9 @@ def register_handlers(dp: Dispatcher):
             row = result.fetchone()
         if row is not None:
             await MainMenu.main_menu_letter(message)
+            await bot.send_message(chat_id=message.chat.id,
+                                   text="Приложения Бота",
+                                   reply_markup=keyboard)
         else:
             builder = InlineKeyboardBuilder()
             builder.add(types.InlineKeyboardButton(

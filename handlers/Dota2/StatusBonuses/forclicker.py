@@ -5,19 +5,19 @@ class MoreAwardWithStatusClicker:
 
     async def add_prize_pool(self):
         if self.status_name == "Guardian":
-            self.prize_pool += 1.5
+            self.prize_pool += (1 + 1.5) * self.prize_pool
         elif self.status_name == "Crusader":
-            self.prize_pool += 2
+            self.prize_pool += (1 + 2) * self.prize_pool
         elif self.status_name == "Archon":
-            self.prize_pool += 3
+            self.prize_pool += (1 + 3) * self.prize_pool
         elif self.status_name == "Legend":
-            self.prize_pool += 4
+            self.prize_pool += (1 + 4) * self.prize_pool
         elif self.status_name == "Ancient 💪":
-            self.prize_pool += 5
+            self.prize_pool += (1 + 5) * self.prize_pool
         elif self.status_name == "Divine ☠️":
-            self.prize_pool += 7
+            self.prize_pool += (1 + 7) * self.prize_pool
         elif self.status_name == "Titan 🔥":
-            self.prize_pool += 14
+            self.prize_pool += (1 + 14) * self.prize_pool
         else:
             self.prize_pool += 0
 

@@ -3,10 +3,12 @@ from random import randint
 
 from aiogram import Dispatcher, types
 from aiogram.enums import ParseMode
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import WebAppInfo
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
 
 from aiogramproject.base.TakeInfoBase import TakeInfo, update_cache
 from aiogramproject.handlers.Dota2.StatusBonuses.fortime import PassiveAwardWithStatus
+from aiogramproject.handlers.bonus.clicker import keyboard
 from aiogramproject.handlers.start import MainMenu
 from aiogramproject.main import bot
 from aiogramproject.logs import logger
@@ -103,20 +105,18 @@ class BonusMenu:
         if status == "Herald" or status == "Guardian":
             but_first = types.InlineKeyboardButton(text="🔥 Ежедневная награда", callback_data="Daily")
             but_second = types.InlineKeyboardButton(text="🤝 Приглашение друга", callback_data="Invite")
-            but_third = types.InlineKeyboardButton(text="🖱️ Кликер", callback_data="Clicker")
             but_four = types.InlineKeyboardButton(text="📣 Викторина", callback_data="Victorin")
             but_five = types.InlineKeyboardButton(text='<< Назад', callback_data='Back')
             builder.add(but_first)
-            builder.row(but_second, but_third, but_four, but_five, width=3)
+            builder.row(but_second, but_four, but_five, width=2)
         else:
             but_first = types.InlineKeyboardButton(text="🔥 Ежедневная награда", callback_data="Daily")
             but_second = types.InlineKeyboardButton(text="🤝 Приглашение друга", callback_data="Invite")
-            but_third = types.InlineKeyboardButton(text="🖱️ Кликер", callback_data="Clicker")
             but_four = types.InlineKeyboardButton(text="📣 Викторина", callback_data="Victorin")
             but_five = types.InlineKeyboardButton(text='<< Назад', callback_data='Back')
             but_six = types.InlineKeyboardButton(text='Получить 🎁', callback_data='take_hour_award')
             builder.row(but_first, but_six, width=2)
-            builder.row(but_second, but_third, but_four, but_five, width=3)
+            builder.row(but_second, but_four, but_five, width=2)
 
         await TakeInfo.user_cache_info_profile(user_id)
         hidden_id = await TakeInfo.take_hidden_id(callback)
