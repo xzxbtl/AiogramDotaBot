@@ -1,14 +1,11 @@
-from datetime import datetime
-from random import randint
-
-from aiogram import Dispatcher, types
-from aiogram.enums import ParseMode
-from aiogram.types import WebAppInfo
-from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
+import json
+from datetime import datetime, timedelta
+from aiogram import Dispatcher, types, F
+from aiogram.enums import ParseMode, ContentType
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from aiogramproject.base.TakeInfoBase import TakeInfo, update_cache
 from aiogramproject.handlers.Dota2.StatusBonuses.fortime import PassiveAwardWithStatus
-from aiogramproject.handlers.bonus.clicker import keyboard
 from aiogramproject.handlers.start import MainMenu
 from aiogramproject.main import bot
 from aiogramproject.logs import logger
@@ -45,35 +42,41 @@ def register_handlers(dp: Dispatcher):
 
         await MainMenu.main_menu(query)
 
-    @dp.callback_query(lambda query: query.data == 'Daily')
-    async def handle_daily_menu(query: types.CallbackQuery):
-        user_id = query.from_user.id
-        current_time = datetime.now()
-        last_execution_time = obj_timely.last_execution.get(query.from_user.id)
+    @dp.message(F.content_type == ContentType.WEB_APP_DATA)
+    async def handle_clicker(message: types.Message):
+        user_id = message.from_user.id
+        award_str = message.web_app_data.data
+        try:
+            award_data = json.loads(award_str)
+            score = int(award_data["award"])
+        except (json.JSONDecodeError, ValueError, KeyError):
+            await message.answer("Ошибка: Некорректные данные.")
+            return
 
+        current_time = datetime.now()
+        last_execution_time = obj_timely.last_execution.get(user_id)
         if last_execution_time is not None:
             time_difference = current_time - last_execution_time
-            if time_difference.total_seconds() < 43200:
-                remaining_time_seconds = 43200 - time_difference.total_seconds()
-                remaining_hours = int(remaining_time_seconds // 3600)
-                remaining_minutes = int((remaining_time_seconds % 3600) // 60)
-                await query.answer(
+            cooldown_time = timedelta(hours=12)
+            if time_difference < cooldown_time:
+                remaining_time = cooldown_time - time_difference
+                remaining_hours = int(remaining_time.total_seconds() // 3600)
+                remaining_minutes = int((remaining_time.total_seconds() % 3600) // 60)
+                await message.answer(
                     f"Награда недоступна еще {remaining_hours} часов {remaining_minutes} минут")
                 return
 
-        obj_timely.last_execution[query.from_user.id] = current_time
+        obj_timely.last_execution[user_id] = current_time
 
-        balance = await TakeInfo.take_balance(query)
-        prize = randint(30, 100)
-        new_balance = balance + prize
-        emoji = await TakeInfo.take_hidden_new_value(query)
+        balance = await TakeInfo.take_balance(message)
+        new_balance = balance + score
+        emoji = await TakeInfo.take_hidden_new_value(message)
         if emoji is None:
             emoji = "💎"
-        if balance is not None:
-            await TakeInfo.update_balance_and_add_to_daily(user_id, new_balance)
-            await update_cache(user_id, new_balance)
 
-        await query.answer(f"Вам была выдана награда: {prize} {emoji}")
+        await TakeInfo.update_balance(user_id, new_balance)
+        await update_cache(user_id, new_balance)
+        await message.answer(f"Вам была выдана награда: {score} {emoji}", show_alert=False)
 
     @dp.callback_query(lambda query: query.data == "take_hour_award")
     async def handle_hour_award(query: types.CallbackQuery):
@@ -103,20 +106,16 @@ class BonusMenu:
         status, balance, username, confirmed = await TakeInfo.take_all_info_about_user(user_id)
         builder = InlineKeyboardBuilder()
         if status == "Herald" or status == "Guardian":
-            but_first = types.InlineKeyboardButton(text="🔥 Ежедневная награда", callback_data="Daily")
             but_second = types.InlineKeyboardButton(text="🤝 Приглашение друга", callback_data="Invite")
             but_four = types.InlineKeyboardButton(text="📣 Викторина", callback_data="Victorin")
             but_five = types.InlineKeyboardButton(text='<< Назад', callback_data='Back')
-            builder.add(but_first)
             builder.row(but_second, but_four, but_five, width=2)
         else:
-            but_first = types.InlineKeyboardButton(text="🔥 Ежедневная награда", callback_data="Daily")
             but_second = types.InlineKeyboardButton(text="🤝 Приглашение друга", callback_data="Invite")
             but_four = types.InlineKeyboardButton(text="📣 Викторина", callback_data="Victorin")
             but_five = types.InlineKeyboardButton(text='<< Назад', callback_data='Back')
             but_six = types.InlineKeyboardButton(text='Получить 🎁', callback_data='take_hour_award')
-            builder.row(but_first, but_six, width=2)
-            builder.row(but_second, but_four, but_five, width=2)
+            builder.row(but_six, but_second, but_four, but_five, width=3)
 
         await TakeInfo.user_cache_info_profile(user_id)
         hidden_id = await TakeInfo.take_hidden_id(callback)

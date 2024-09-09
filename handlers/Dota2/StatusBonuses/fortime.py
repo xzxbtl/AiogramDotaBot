@@ -1,4 +1,3 @@
-
 from aiogramproject.handlers.Dota2.StatusBonuses.forclicker import MoreAwardWithStatusClicker
 from datetime import datetime, timedelta
 

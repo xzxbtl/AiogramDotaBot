@@ -1,5 +1,3 @@
-import json
-
 from aiogram import Dispatcher, types, F
 from aiogram.enums import ContentType
 from aiogram.types import WebAppInfo, ReplyKeyboardMarkup, KeyboardButton
@@ -7,11 +5,15 @@ from aiogram.types import WebAppInfo, ReplyKeyboardMarkup, KeyboardButton
 from aiogramproject.base.TakeInfoBase import TakeInfo, update_cache
 from aiogramproject.handlers.Dota2.StatusBonuses.forclicker import MoreAwardWithStatusClicker
 
-web_app = WebAppInfo(url="https://xzxbtl.github.io/")
+web_app_clicker = WebAppInfo(url="https://xzxbtl.github.io/")
+web_app_bonus = WebAppInfo(url="https://santaniel31.github.io/")
 
 keyboard = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="🖱️ Кликер", web_app=web_app)]
+        [
+            KeyboardButton(text="🖱️Кликер", web_app=web_app_clicker),
+            KeyboardButton(text="🔥 Ежедневная награда", web_app=web_app_bonus)
+        ]
     ],
     resize_keyboard=True,
 )
