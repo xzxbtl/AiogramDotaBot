@@ -28,4 +28,4 @@
 [📢 Telegram Apps](https://core.telegram.org/bots/webapps#webappuser)
 
 ## Thx <3
-![BB](https://media1.tenor.com/m/tYJwoE3sIKkAAAAC/nope-mm.gif)
+![BB](https://media.tenor.com/WTWg2AAc7bsAAAAi/masha-roshidere.gif)
